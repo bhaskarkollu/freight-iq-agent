@@ -1,4 +1,4 @@
-# FreightAI — Angular 17 Invoice Intelligence Platform
+# FreightAI — Invoice Intelligence Platform
 
 Conversational AI-powered invoice search built with **Angular 17** (standalone
 components, new `@if`/`@for` control flow, signals) and a **FastAPI** backend.
@@ -117,6 +117,7 @@ podman compose up --build
 ## NLP Query Examples
 
 ```
+**Customer Insights: **
 show all invoices
 overdue invoices
 paid invoices for Acme Logistics
@@ -127,6 +128,13 @@ INV-2024-015
 Pacific Freight overdue
 amount between 5000 and 15000
 paid invoices in January
+
+**Operational Insights:**
+what is the eta and reasons for delay of shipment #
+any forecasted delays for shipment#
+reason for system exceptions
+triage and query - find the reason for delivery issues 
+
 ```
 
 ---

@@ -1,0 +1,120 @@
+<div class="chat-panel">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <span class="pulse-dot pulse-green"></span>
+    <span class="header-label">Agent Chat</span>
+    <span class="header-sub">NLP Invoice Search</span>
+  </div>
+
+  <!-- Message list -->
+  <div class="messages-list">
+
+    @if (messages.length === 0) {
+      <div class="welcome">
+        <div class="welcome-title">CustomerInvoiceIQ Agent</div>
+        <div class="welcome-body">
+          Ask anything about your customer invoices in plain English.
+          Search by status, customer, amount, date, or invoice number.
+        </div>
+      </div>
+    }
+
+    @for (msg of messages; track $index) {
+      @if (msg.role === 'user') {
+        <!-- User bubble -->
+        <div class="bubble bubble-user">
+          <div class="bubble-role">You</div>
+          <div class="bubble-text">{{ msg.content }}</div>
+        </div>
+      } @else {
+        <!-- Agent bubble -->
+        <div class="bubble bubble-agent">
+          <div class="bubble-role">
+            @if (msg.isLoading) {
+              <span class="loading-row">
+                <span class="spinner" style="width:10px;height:10px;border-width:1.5px"></span>
+                Searching…
+              </span>
+            } @else {
+              Agent
+            }
+          </div>
+
+          @if (msg.isLoading) {
+            <div class="loading-text">Parsing query and filtering invoices…</div>
+          } @else {
+            <div class="agent-body" [innerHTML]="msg.content | markdown"></div>
+
+            @if (hasStats(msg)) {
+              <div class="stats-bar">
+                <span class="stats-label">Results:</span>
+                <span class="stats-accent">{{ msg.stats.count }}</span>
+                <span class="stats-sep">|</span>
+                <span class="stats-label">Due:</span>
+                <span [class.stats-red]="msg.stats.total_due > 0"
+                      [class.stats-green]="msg.stats.total_due === 0">
+                  {{ fmtDue(msg.stats.total_due) }}
+                </span>
+              </div>
+            }
+
+            @if (filterKeys(msg.filters).length > 0) {
+              <div class="filter-tags">
+                @for (k of filterKeys(msg.filters); track k) {
+                  <span class="filter-tag">{{ k }}: {{ msg.filters![k] }}</span>
+                }
+              </div>
+            }
+          }
+        </div>
+      }
+    }
+
+    <div #messagesEnd></div>
+  </div>
+
+  <!-- Quick suggestions (only when no messages) -->
+  @if (messages.length === 0) {
+    <div class="suggestions-area">
+      <div class="suggestions-label">Quick searches</div>
+      <div class="suggestions-grid">
+        @for (s of suggestions; track s) {
+          <button
+            class="suggestion-chip"
+            [disabled]="isSearching"
+            (click)="submitSuggestion(s)">
+            {{ s }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Input area -->
+  <div class="input-area">
+    <div class="input-row">
+      <textarea
+        class="chat-input"
+        [value]="query"
+        (input)="onQueryChange($any($event.target).value)"
+        (keydown)="onKeyDown($event)"
+        [disabled]="isSearching"
+        placeholder="Search invoices in plain English…"
+        rows="2">
+      </textarea>
+      <button
+        class="btn btn-primary send-btn"
+        (click)="submit()"
+        [disabled]="!query.trim() || isSearching">
+        @if (isSearching) {
+          <span class="spinner" style="width:14px;height:14px;border-width:2px"></span>
+        } @else {
+          →
+        }
+      </button>
+    </div>
+    <div class="input-hint">↵ Enter to search · Shift+Enter for new line</div>
+  </div>
+
+</div>

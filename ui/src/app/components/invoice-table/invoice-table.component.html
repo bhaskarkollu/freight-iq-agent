@@ -1,0 +1,92 @@
+@if (sorted().length === 0) {
+  <div class="empty-state">
+    <span class="empty-icon">📭</span>
+    <span class="empty-title">No invoices match your query</span>
+    <span class="empty-sub">Try a different search term in the agent chat</span>
+  </div>
+} @else {
+  <div class="table-scroll">
+    <table class="inv-table">
+      <thead>
+        <tr>
+          @for (col of cols; track col.key) {
+            <th
+              [class.sort-active]="sortKey() === col.key"
+              [class.align-right]="col.align === 'right'"
+              (click)="sort(col.key)">
+              {{ col.label }}{{ sortIcon(col.key) }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (inv of sorted(); track inv.id) {
+          <tr
+            [class.selected]="selectedId === inv.id"
+            (click)="select(inv.id)">
+
+            <!-- 1. Invoice Number -->
+            <td>
+              <div class="inv-num">{{ inv.invoice_number }}</div>
+              <div class="inv-sub">{{ inv.customer_name }}</div>
+            </td>
+
+            <!-- 2. Creation Date -->
+            <td class="date-cell">{{ inv.creation_date | fmtDate }}</td>
+
+            <!-- 3. Delivered Date -->
+            <td class="date-cell">
+              @if (inv.delivered_date) {
+                {{ inv.delivered_date | fmtDate }}
+              } @else {
+                <span class="na">—</span>
+              }
+            </td>
+
+            <!-- 4. Amount Total -->
+            <td class="amount-cell">{{ inv.amount_total | money }}</td>
+
+            <!-- 5. Amount Due -->
+            <td class="amount-cell">
+              <span [class.due-zero]="inv.amount_due === 0"
+                    [class.due-pos]="inv.amount_due > 0">
+                {{ inv.amount_due | money }}
+              </span>
+            </td>
+
+            <!-- 6. Status -->
+            <td>
+              <span [className]="statusClass(inv.status)">
+                {{ statusDot(inv.status) }} {{ inv.status }}
+              </span>
+            </td>
+
+            <!-- 7. Settlements Count -->
+            <td class="amount-cell">
+              <span [class.settle-pos]="inv.settlements_count > 0"
+                    [class.settle-zero]="inv.settlements_count === 0">
+                {{ inv.settlements_count }}
+                @if (inv.settlements_count > 1) {
+                  <span class="pmts-label"> pmts</span>
+                }
+              </span>
+            </td>
+
+            <!-- 8. Charge Items Total -->
+            <td class="amount-cell charge-col">
+              {{ inv.charge_items_total | money }}
+            </td>
+
+            <!-- 9. Format Type -->
+            <td>
+              <span [className]="formatClass(inv.format_type)">
+                {{ inv.format_type }}
+              </span>
+            </td>
+
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

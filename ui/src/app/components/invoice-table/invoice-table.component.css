@@ -1,0 +1,109 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Empty state ──────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  height: 100%;
+}
+.empty-icon  { font-size: 38px; }
+.empty-title { font-size: 14px; color: var(--text-secondary); }
+.empty-sub   { font-size: 12px; }
+
+/* ── Table wrapper ────────────────────────────── */
+.table-scroll {
+  overflow: auto;
+  flex: 1;
+}
+
+/* ── Table base ───────────────────────────────── */
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+/* ── Header ───────────────────────────────────── */
+.inv-table thead th {
+  padding: 9px 14px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  background: var(--bg-panel);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  transition: color 0.12s;
+}
+.inv-table thead th:hover    { color: var(--text-secondary); }
+.inv-table thead th.sort-active { color: var(--accent); }
+.inv-table thead th.align-right { text-align: right; }
+
+/* ── Rows ─────────────────────────────────────── */
+.inv-table tbody tr {
+  transition: background 0.1s;
+  cursor: pointer;
+}
+.inv-table tbody tr:hover td  { background: var(--bg-hover); }
+.inv-table tbody tr.selected td { background: var(--accent-glow); }
+
+.inv-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text-primary);
+}
+
+/* ── Cell variants ────────────────────────────── */
+.inv-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+}
+.inv-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.date-cell {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.amount-cell {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: right;
+}
+.charge-col { color: var(--text-secondary); }
+
+.na { color: var(--text-muted); font-size: 12px; }
+
+.due-zero { color: var(--green); }
+.due-pos  { color: var(--red); }
+
+.settle-pos  { color: var(--green); }
+.settle-zero { color: var(--text-muted); }
+.pmts-label  { font-size: 10px; color: var(--text-muted); }

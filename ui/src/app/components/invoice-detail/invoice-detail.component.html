@@ -1,0 +1,284 @@
+<div class="drawer-overlay" (click)="onOverlayClick($event)">
+  <div class="drawer">
+
+    <!-- ── Sticky header ───────────────────────────────── -->
+    <div class="drawer-header">
+      <div class="drawer-title-block">
+        @if (loading()) {
+          <span class="inv-num-placeholder">Loading…</span>
+        } @else if (inv()) {
+          <span class="drawer-inv-num">{{ inv()!.invoice_number }}</span>
+          <span class="drawer-sub">{{ inv()!.customer_name }} · {{ inv()!.vendor_name }}</span>
+        }
+      </div>
+      <button class="btn btn-ghost btn-sm close-btn" (click)="close()">✕ Close</button>
+    </div>
+
+    @if (loading()) {
+      <div class="loader-row">
+        <span class="spinner"></span>
+        <span class="loader-text">Loading invoice data…</span>
+      </div>
+    }
+
+    @if (!loading() && inv()) {
+      <!-- ── Status strip ─────────────────────────────── -->
+      <div class="status-strip">
+        <span [className]="'badge badge-' + inv()!.status">
+          {{ inv()!.status }}
+        </span>
+        <span [className]="'chip chip-' + inv()!.format_type.toLowerCase()">
+          {{ inv()!.format_type }}
+        </span>
+        @if (recon()?.has_mismatch) {
+          <span class="mismatch-warn">⚠ Source Mismatch Detected</span>
+        }
+        <span class="tracking-num">{{ inv()!.tracking_number }}</span>
+      </div>
+
+      <!-- ── Tab bar ─────────────────────────────────── -->
+      <div class="tab-bar">
+        @for (tab of tabs; track tab) {
+          <button
+            class="tab-btn"
+            [class.tab-active]="activeTab() === tab"
+            (click)="setTab(tab)">
+            {{ tab }}
+          </button>
+        }
+      </div>
+
+      <!-- ═══════ TAB: OVERVIEW ════════════════════════ -->
+      @if (activeTab() === 'overview') {
+        <div class="tab-content">
+          <div class="section-header">Invoice Details</div>
+          <div class="row-item"><span class="row-label">Invoice Number</span><span class="row-val mono">{{ inv()!.invoice_number }}</span></div>
+          <div class="row-item"><span class="row-label">Customer</span><span class="row-val">{{ inv()!.customer_name }}</span></div>
+          <div class="row-item"><span class="row-label">Vendor</span><span class="row-val">{{ inv()!.vendor_name }}</span></div>
+          <div class="row-item">
+            <span class="row-label">Format Type</span>
+            <span [className]="'chip chip-' + inv()!.format_type.toLowerCase()">{{ inv()!.format_type }}</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Status</span>
+            <span [className]="'badge badge-' + inv()!.status">{{ inv()!.status }}</span>
+          </div>
+
+          <div class="section-header">Dates</div>
+          <div class="row-item"><span class="row-label">Creation Date</span><span class="row-val mono">{{ inv()!.creation_date | fmtDate }}</span></div>
+          <div class="row-item"><span class="row-label">Delivered Date</span><span class="row-val mono">{{ inv()!.delivered_date | fmtDate }}</span></div>
+
+          <div class="section-header">Financials</div>
+          <div class="row-item">
+            <span class="row-label">Amount Total</span>
+            <span class="row-val mono">{{ inv()!.amount_total | money }}</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Amount Due</span>
+            <span class="row-val mono"
+                  [style.color]="inv()!.amount_due > 0 ? 'var(--red)' : 'var(--green)'">
+              {{ inv()!.amount_due | money }}
+            </span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Settlements Count</span>
+            <span class="row-val mono">{{ inv()!.settlements.length }}</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Charge Items Total</span>
+            <span class="row-val mono">{{ chargeTotal(inv()!.charge_items) | money }}</span>
+          </div>
+
+          <div class="section-header">Routing</div>
+          <div class="row-item"><span class="row-label">Origin</span><span class="row-val">{{ inv()!.origin }}</span></div>
+          <div class="row-item"><span class="row-label">Destination</span><span class="row-val">{{ inv()!.destination }}</span></div>
+          <div class="row-item"><span class="row-label">Tracking</span><span class="row-val mono">{{ inv()!.tracking_number }}</span></div>
+
+          @if (inv()!.notes) {
+            <div class="section-header">Notes</div>
+            <div class="notes-block">{{ inv()!.notes }}</div>
+          }
+        </div>
+      }
+
+      <!-- ═══════ TAB: CHARGES ══════════════════════════ -->
+      @if (activeTab() === 'charges') {
+        <div class="tab-content">
+          <div class="section-header">Charge Line Items</div>
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Category</th>
+                <th class="r">Qty</th>
+                <th class="r">Unit Rate</th>
+                <th class="r">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ci of inv()!.charge_items; track ci.item_id) {
+                <tr>
+                  <td>{{ ci.description }}</td>
+                  <td><span [className]="categoryClass(ci.category)">{{ ci.category }}</span></td>
+                  <td class="r mono-sm">{{ ci.quantity }}</td>
+                  <td class="r mono-sm text-sec">{{ ci.unit_rate | money }}</td>
+                  <td class="r mono-sm">{{ ci.amount | money }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="total-label">Total</td>
+                <td class="r mono-sm total-val">{{ chargeTotal(inv()!.charge_items) | money }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+
+      <!-- ═══════ TAB: SETTLEMENTS ══════════════════════ -->
+      @if (activeTab() === 'settlements') {
+        <div class="tab-content">
+          <div class="section-header">Settlement Records</div>
+          @if (inv()!.settlements.length === 0) {
+            <div class="empty-tab">No settlements recorded for this invoice.</div>
+          } @else {
+            @for (s of inv()!.settlements; track s.settlement_id) {
+              <div class="settle-card">
+                <div class="settle-top">
+                  <span class="settle-id mono-sm">{{ s.settlement_id }}</span>
+                  <span class="settle-amount">{{ s.amount | money }}</span>
+                </div>
+                <div class="settle-meta">
+                  <span>📅 {{ s.date | fmtDate }}</span>
+                  <span>💳 {{ s.method }}</span>
+                  <span>🔖 {{ s.reference }}</span>
+                  <span class="settle-status" [style.color]="settleStatusColor(s.status)">
+                    {{ s.status }}
+                  </span>
+                </div>
+              </div>
+            }
+            <div class="settle-footer">
+              <span class="settle-footer-label">Total Settled</span>
+              <span class="settle-footer-val">{{ settleTotal(inv()!.settlements) | money }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ═══════ TAB: RECONCILE ════════════════════════ -->
+      @if (activeTab() === 'reconcile') {
+        <div class="tab-content">
+          <div class="section-header">Source Comparison — PDF / XLS / DB / Index</div>
+
+            @if (recon()) {
+              @for (key of sourceKeys(recon()!.sources); track key) {
+              <div class="recon-row"
+                   [class.recon-mismatch]="hasDelta(sourceValue(recon()!.sources, key), sourceValue(recon()!.sources, 'DB'))">
+                <div class="recon-left">
+                  <span class="recon-src">{{ key }}</span>
+                  @if (hasDelta(sourceValue(recon()!.sources, key), sourceValue(recon()!.sources, 'DB'))) {
+                    <span class="mismatch-pill">⚠ MISMATCH</span>
+                  }
+                </div>
+                <div class="recon-right">
+                  @if (hasDelta(sourceValue(recon()!.sources, key), sourceValue(recon()!.sources, 'DB'))) {
+                    <span class="recon-delta"
+                          [style.color]="sourceDelta(sourceValue(recon()!.sources, key), sourceValue(recon()!.sources, 'DB')) > 0 ? 'var(--red)' : 'var(--green)'">
+                      {{ sourceDelta(sourceValue(recon()!.sources, key), sourceValue(recon()!.sources, 'DB')) > 0 ? '+' : '' }}{{ sourceDelta(sourceValue(recon()!.sources, key), sourceValue(recon()!.sources, 'DB')) | money }}
+                    </span>
+                  }
+                  <span class="recon-val"
+                        [style.color]="hasDelta(sourceValue(recon()!.sources, key), sourceValue(recon()!.sources, 'DB')) ? 'var(--amber)' : 'var(--text-primary)'">
+                    {{ sourceValue(recon()!.sources, key) | money }}
+                  </span>
+                </div>
+              </div>
+            }
+
+            <div class="recon-row">
+              <span class="row-label">Charge Items Total</span>
+              <span class="recon-val mono-sm">{{ recon()!.charge_items_total | money }}</span>
+            </div>
+
+            @if (!recon()!.has_mismatch) {
+              <div class="recon-ok">✓ All sources match — no reconciliation issues detected.</div>
+            }
+
+            @if (recon()!.issues && recon()!.issues.length > 0) {
+              <div class="issues-block">
+                <div class="issues-header">ISSUES DETECTED</div>
+                @for (issue of recon()!.issues; track issue.source) {
+                  <div class="issue-item">
+                    <strong>{{ issue.source }}</strong> total differs by {{ issue.delta | money }} — severity: {{ issue.severity }}
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      }
+
+      <!-- ═══════ TAB: CAUSE ═════════════════════════════ -->
+      @if (activeTab() === 'cause') {
+        <div class="tab-content">
+          <div class="section-header">Issue Summary</div>
+          <div class="issue-summary-grid">
+            <div>
+              <div class="summary-label">Reason / Cause</div>
+              <div class="summary-value">{{ issueCategory() }}</div>
+            </div>
+            <div>
+              <div class="summary-label">Invoice Status</div>
+              <div class="summary-value">{{ inv()!.status }}</div>
+            </div>
+            <div>
+              <div class="summary-label">Exception Trace</div>
+              <div class="summary-value summary-link"><a href="{{ datadogLink() }}" target="_blank" rel="noreferrer">Datadog Trace</a></div>
+            </div>
+          </div>
+
+          <div class="section-header">Cause Details</div>
+          <ul class="issue-list">
+            @for (detail of issueDetails(); track detail) {
+              <li>{{ detail }}</li>
+            }
+          </ul>
+
+          <div class="section-header">Recommended Fix</div>
+          <ul class="fix-list">
+            @for (fix of issueFixes(); track fix) {
+              <li>{{ fix }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <!-- ═══════ TAB: DELIVERY ═════════════════════════ -->
+      @if (activeTab() === 'delivery') {
+        <div class="tab-content">
+          <div class="section-header">Delivery Audit Trail</div>
+          @if (delivery()) {
+            <div class="timeline">
+              @for (evt of delivery()!.events; track $index; let last = $last) {
+                <div class="tl-item">
+                  <div class="tl-spine">
+                    <span class="tl-dot" [ngClass]="eventDotClass(evt.status)"></span>
+                    @if (!last) { <span class="tl-line"></span> }
+                  </div>
+                  <div class="tl-body">
+                    <div class="tl-event">{{ evt.event.replace('_', ' ') }}</div>
+                    <div class="tl-detail">{{ evt.detail }}</div>
+                    <div class="tl-date mono-sm">{{ evt.date | fmtDate }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+
+  </div><!-- /drawer -->
+</div><!-- /overlay -->

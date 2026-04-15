@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: freightai-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./api:/app
+    networks:
+      - freightai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: freightai-angular
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - freightai-net
+    volumes:
+      - ./ui/src:/app/src
+
+networks:
+  freightai-net:
+    driver: bridge

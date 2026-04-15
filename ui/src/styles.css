@@ -1,0 +1,214 @@
+/* ── Reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Design tokens ──────────────────────────────────── */
+:root {
+  --bg-app:        #0d0f14;
+  --bg-sidebar:    #111318;
+  --bg-panel:      #16191f;
+  --bg-card:       #1c2028;
+  --bg-input:      #1a1d25;
+  --bg-hover:      #242833;
+  --bg-active:     #2a2f3d;
+
+  --accent:        #f97316;
+  --accent-dim:    #7c3a1a;
+  --accent-glow:   rgba(249, 115, 22, 0.12);
+  --accent-border: rgba(249, 115, 22, 0.35);
+
+  --blue:          #38bdf8;
+  --blue-dim:      #0c4a6e;
+  --green:         #4ade80;
+  --green-dim:     #14532d;
+  --amber:         #fbbf24;
+  --amber-dim:     #78350f;
+  --red:           #f87171;
+  --red-dim:       #7f1d1d;
+  --purple:        #a78bfa;
+  --purple-dim:    #4c1d95;
+
+  --text-primary:   #f0f2f5;
+  --text-secondary: #8b92a5;
+  --text-muted:     #4b5263;
+  --text-accent:    #f97316;
+
+  --border:        #252a35;
+  --border-light:  #2e3446;
+
+  --font-display:  'Syne', sans-serif;
+  --font-body:     'DM Sans', sans-serif;
+  --font-mono:     'DM Mono', monospace;
+
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── Scrollbars ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Status badges ─────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.badge-paid     { background: var(--green-dim);  color: var(--green); }
+.badge-pending  { background: var(--blue-dim);   color: var(--blue); }
+.badge-overdue  { background: var(--red-dim);    color: var(--red); }
+.badge-disputed { background: var(--amber-dim);  color: var(--amber); }
+.badge-cancelled{ background: #1a1e2b;           color: var(--text-muted); }
+
+/* ── Format chips ─────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.chip-detail  { background: #1e253a; color: var(--blue);  border: 1px solid #1e3a5a; }
+.chip-summary { background: #1e2a1e; color: var(--green); border: 1px solid #1a3a1a; }
+
+/* ── Buttons ──────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #ea6c0a; }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+/* ── Spinner ──────────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border-light);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Pulse dot ────────────────────────────────────── */
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.pulse-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.pulse-green { background: var(--green); }
+.pulse-amber { background: var(--amber); }
+
+/* ── Stat cards ──────────────────────────────────── */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+.stat-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.stat-value.accent { color: var(--accent); }
+.stat-value.green  { color: var(--green); }
+.stat-value.red    { color: var(--red); }
+
+/* ── Suggestion chips ────────────────────────────── */
+.suggestion-chip {
+  padding: 5px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  font-family: var(--font-body);
+}
+.suggestion-chip:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+.suggestion-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Mono utility ────────────────────────────────── */
+.mono { font-family: var(--font-mono); }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Drawer overlay ──────────────────────────────── */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+}
+.drawer {
+  width: min(700px, 96vw);
+  height: 100%;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  animation: slideIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}

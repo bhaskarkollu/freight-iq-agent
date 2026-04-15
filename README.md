@@ -78,6 +78,19 @@ components, new `@if`/`@for` control flow, signals) and a **FastAPI** backend.
 ```bash
 chmod +x start.sh stop.sh
 ./start.sh
+
+Container Status: 
+<img width="1026" height="360" alt="image" src="https://github.com/user-attachments/assets/b58078a2-c448-4baf-8830-1f4b180ee4b0" />
+
+Demo Video:
+
+
+https://github.com/user-attachments/assets/11cb61e6-54ec-44d7-82ef-99f06fbdd170
+
+
+
+
+
 ```
 
 Open: **http://localhost:4200**
